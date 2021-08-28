@@ -10,6 +10,21 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   String name = "";
   bool changeButton = false;
+  final _formKey = GlobalKey<FormState>();
+
+  moveToHome(BuildContext context) async {
+    if (_formKey.currentState?.validate() ?? true) {
+      setState(() {
+        changeButton = true;
+      });
+      await Future.delayed(Duration(seconds: 1));
+      await Navigator.pushNamed(context, MyRoutes.homeRoute);
+      setState(() {
+        changeButton = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -35,61 +50,73 @@ class _LoginPageState extends State<LoginPage> {
               Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                child: Column(
-                  children: [
-                    TextFormField(
-                      decoration: InputDecoration(
-                          hintText: "Enter username", labelText: "username"),
-                      onChanged: (value) {
-                        name = value;
-                        setState(() {});
-                      },
-                    ),
-                    TextFormField(
-                      obscureText: true,
-                      decoration: InputDecoration(
-                          hintText: "Enter password", labelText: "password"),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    InkWell(
-                      onTap: () async {
-                        setState(() {
-                          changeButton = true;
-                        });
-                        await Future.delayed(Duration(seconds: 1));
-                        Navigator.pushNamed(context, MyRoutes.homeRoute);
-                      },
-                      child: AnimatedContainer(
-                        duration: Duration(seconds: 1),
-                        height: 50,
-                        width: changeButton ? 50 : 150,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(changeButton ? 20 : 8),
-                            color: Colors.deepPurple),
-                        child: changeButton
-                            ? Icon(
-                                Icons.done,
-                                color: Colors.white,
-                              )
-                            : Text(
-                                "Login",
-                                style: TextStyle(
-                                    fontSize: 18, color: Colors.white),
-                              ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        decoration: InputDecoration(
+                            hintText: "Enter username", labelText: "username"),
+                        onChanged: (value) {
+                          name = value;
+                          setState(() {});
+                        },
+                        validator: (value) {
+                          if (value?.isEmpty ?? true) {
+                            return "Username cannot be empty!";
+                          }
+                          return null;
+                        },
                       ),
-                    )
-                    // ElevatedButton(
-                    //   child: Text("Login"),
-                    //   style: TextButton.styleFrom(),
-                    //   onPressed: () {
-                    //     Navigator.pushNamed(context, MyRoutes.homeRoute);
-                    //   },
-                    // )
-                  ],
+                      TextFormField(
+                        obscureText: true,
+                        decoration: InputDecoration(
+                            hintText: "Enter password", labelText: "password"),
+                        validator: (value) {
+                          if (value?.isEmpty ?? true) {
+                            return "Password cannot be empty!";
+                          } else if (value!.length < 6) {
+                            return "Password length cannot be less than 6!";
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Material(
+                        borderRadius:
+                            BorderRadius.circular(changeButton ? 20 : 8),
+                        color: Colors.deepPurple,
+                        child: InkWell(
+                          onTap: () => moveToHome(context),
+                          child: AnimatedContainer(
+                            duration: Duration(seconds: 1),
+                            height: 50,
+                            width: changeButton ? 50 : 150,
+                            alignment: Alignment.center,
+                            child: changeButton
+                                ? Icon(
+                                    Icons.done,
+                                    color: Colors.white,
+                                  )
+                                : Text(
+                                    "Login",
+                                    style: TextStyle(
+                                        fontSize: 18, color: Colors.white),
+                                  ),
+                          ),
+                        ),
+                      )
+                      // ElevatedButton(
+                      //   child: Text("Login"),
+                      //   style: TextButton.styleFrom(),
+                      //   onPressed: () {
+                      //     Navigator.pushNamed(context, MyRoutes.homeRoute);
+                      //   },
+                      // )
+                    ],
+                  ),
                 ),
               ),
             ],
